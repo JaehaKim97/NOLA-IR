@@ -1,0 +1,40 @@
+pipeline: pipeline.optical_character_recognition.base.BasePipeline
+exp_dir: experiments/optical_character_recognition/mj/001_lq
+precision: bf16
+seed: 123
+
+model:
+  ocr_model:
+    target: model.naver_ocr.BasicModel
+    params:
+      Transformation: None
+      FeatureExtraction: VGG
+      SequenceModeling: BiLSTM
+      Prediction: CTC
+      imgH: 256
+      imgW: 64
+      use_rgb: true
+      input_channel: 3
+    target_layers: ["L14"]
+
+dataset: configs/optical_character_recognition/mj/realesrgan_cfg.yaml
+
+train:
+  resume:
+    res_model: ~
+    ocr_model: ~
+    strict_load: false
+  optimizer:
+    res_model: ~
+    ocr_model:
+      type: adam
+      kwargs:
+        lr: 2e-4
+  batch_size: 192
+  train_steps: 200000
+  log_every: 1000
+  ckpt_every: 100000
+  image_every: 1000
+val:
+  batch_size: 192
+  val_every: 50000

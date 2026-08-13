@@ -1,0 +1,40 @@
+pipeline: pipeline.classification.base.BasePipeline
+exp_dir: experiments/classification/cub200/000_hq
+precision: bf16
+seed: 123
+
+model:
+  cls_model:
+    target: model.resnet.ResNet
+    params:
+      type: 18
+      num_classes: 200
+    target_layers: ["L4"]
+  cls_hq_model:
+    weights: weights/ResNet18_CUB200_HQ.pt
+
+dataset: configs/classification/cub200/realesrgan_cfg.yaml
+
+train:
+  use_gt: true
+  resume:
+    res_model: ~
+    cls_model: ResNet18_Weights.IMAGENET1K_V1
+    strict_load: false
+  optimizer:
+    res_model: ~
+    cls_model:
+      type: SGD
+      kwargs:
+        lr: 1e-2
+        momentum: 0.9
+        weight_decay: 1e-4
+  batch_size: 32
+  train_steps: 20000
+  log_every: 100
+  ckpt_every: 10000
+  image_every: 1000
+val:
+  use_gt: true
+  batch_size: 32
+  val_every: 1000

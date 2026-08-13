@@ -1,0 +1,79 @@
+pipeline: pipeline.segmentation.nola_ir_tpgan.NOLAIRTPGANPipeline
+exp_dir: experiments/segmentation/voc2012/009_nola-ir-tpgan
+precision: bf16
+seed: 123
+
+model:
+  sd_path: weights/stable-diffusion-2-1-base
+  diffusion:
+    start: 200
+    num_timesteps: 1
+  train_vae: false
+  lora:
+    rank: 64
+    target_modules: [to_k, to_q, to_v, to_out.0, conv, conv1, conv2, conv_shortcut, conv_out, proj_in, proj_out, ff.net.2, ff.net.0.proj]
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  seg_model:
+    target: model.deeplabv3.deeplabv3_mobilenet_v3_large
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+      aux_loss: false
+    target_layers: ["C5"]
+  seg_hq_model:
+    weights: weights/DeepLabV3_MobileNetV3_VOC2012_HQ.pt
+  disc:
+    target: model.discriminator.ImageConvNextDiscriminator
+    params:
+      precision: bf16
+
+dataset: configs/segmentation/voc2012/realesrgan_cfg.yaml
+
+train:
+  resume:
+    res_model: experiments/segmentation/voc2012/002_res-only/checkpoints/res_model_last.pt
+    lora_unet: experiments/segmentation/voc2012/008_nola-ir/checkpoints/lora_unet_last.pt
+    seg_model: experiments/segmentation/voc2012/008_nola-ir/checkpoints/seg_model_last.pt
+    strict_load: true
+  optimizer:
+    nolair:
+      type: adamw
+      kwargs:
+        lr: 5e-5
+    seg_model:
+      type: SGD
+      kwargs:
+        lr: 2.5e-3
+        momentum: 0.9
+        weight_decay: 1e-6
+  weight:
+    hlf: 1.0
+    reg: 0.1
+    adv: 0.05
+    seg: 1.0
+    fm: 0.5
+  adv_start: 1000
+  batch_size: 16
+  train_steps: 10000
+  log_every: 100
+  ckpt_every: 10000
+  image_every: 500
+val:
+  batch_size: -1
+  val_every: 2000

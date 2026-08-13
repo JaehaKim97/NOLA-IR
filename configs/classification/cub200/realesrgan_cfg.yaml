@@ -1,0 +1,61 @@
+num_workers: 16
+train:
+  target: datasets.realesrgan_cls.RealesrganCLSDataset
+  params:
+    root: datasets/source/CUB200/train
+    file_backend_cfg:
+      target: datasets.file_backend.HardDiskBackend
+    gt_size: 576
+    out_size: 512
+    hflip: true
+    rotation: false
+    crop_type: random
+    blur_kernel_size: 21
+    kernel_list: ['iso', 'aniso', 'generalized_iso', 'generalized_aniso', 'plateau_iso', 'plateau_aniso']
+    kernel_prob: [0.45, 0.25, 0.12, 0.03, 0.12, 0.03]
+    sinc_prob: 0.1
+    blur_sigma: [0.2, 3]
+    betag_range: [0.5, 4]
+    betap_range: [1, 2]
+    blur_kernel_size2: 21
+    kernel_list2: ['iso', 'aniso', 'generalized_iso', 'generalized_aniso', 'plateau_iso', 'plateau_aniso']
+    kernel_prob2: [0.45, 0.25, 0.12, 0.03, 0.12, 0.03]
+    sinc_prob2: 0.1
+    blur_sigma2: [0.2, 1.5]
+    betag_range2: [0.5, 4]
+    betap_range2: [1, 2]
+    final_sinc_prob: 0.8
+    return_file_name: true
+batch_transform:
+  target: datasets.batch_transform.RealESRGANBatchTransform
+  params:
+    hq_key: hq
+    extra_keys: [txt, label, filename]
+    use_sharpener: false
+    # Queue size of training pool, this should be multiples of batch_size (per GPU).
+    queue_size: 0
+    # the first degradation process
+    resize_prob: [0.0, 1.0, 0.0] # up, down, keep
+    resize_range: [0.15, 1.5]
+    gaussian_noise_prob: 0.5
+    noise_range: [1, 30]
+    poisson_scale_range: [0.05, 3]
+    gray_noise_prob: 0.4
+    jpeg_range: [30, 95]
+    # the second degradation process
+    stage2_scale: 4
+    second_blur_prob: 0.8
+    resize_prob2: [0.0, 1.0, 0.0] # up, down, keep
+    resize_range2: [0.20, 1.2]
+    gaussian_noise_prob2: 0.5
+    noise_range2: [1, 25]
+    poisson_scale_range2: [0.05, 2.5]
+    gray_noise_prob2: 0.4
+    jpeg_range2: [30, 95]
+    resize_back: true
+val:
+  target: datasets.paired_cls.PairedCLSDataset
+  params:
+    root: datasets/source/CUB200/val-realesrgan
+    file_backend_cfg:
+      target: datasets.file_backend.HardDiskBackend

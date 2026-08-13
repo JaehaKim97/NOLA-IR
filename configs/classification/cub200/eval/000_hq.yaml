@@ -1,0 +1,23 @@
+pipeline: pipeline.classification.base.BasePipeline
+exp_dir: experiments/classification/cub200/000_hq
+precision: bf16
+seed: 123
+
+model:
+  cls_model:
+    target: model.resnet.ResNet
+    params:
+      type: 18
+      num_classes: 200
+    target_layers: ["L4"]
+  cls_hq_model:
+    weights: weights/ResNet18_CUB200_HQ.pt
+
+dataset: configs/classification/cub200/realesrgan_cfg.yaml
+
+val:
+  use_gt: true
+  resume:
+    res_model: ~
+    cls_model: experiments/classification/cub200/000_hq/checkpoints/cls_model_last.pt
+  batch_size: 32

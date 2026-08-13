@@ -1,0 +1,39 @@
+pipeline: pipeline.classification.res_only.RestorationOnlyPipeline
+exp_dir: experiments/classification/cub200/002_res-only
+precision: bf16
+seed: 123
+
+model:
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  cls_model:
+    target: model.resnet.ResNet
+    params:
+      type: 18
+      num_classes: 200
+    target_layers: ["L4"]
+  cls_hq_model:
+    weights: weights/ResNet18_CUB200_HQ.pt
+
+dataset: configs/classification/cub200/realesrgan_cfg.yaml
+
+val:
+  resume:
+    res_model: experiments/classification/cub200/002_res-only/checkpoints/res_model_last.pt
+    cls_model: experiments/classification/cub200/002_res-only/checkpoints/cls_model_last.pt
+  batch_size: 48

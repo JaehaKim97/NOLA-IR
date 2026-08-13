@@ -1,0 +1,39 @@
+pipeline: pipeline.segmentation.base.BasePipeline
+exp_dir: experiments/segmentation/voc2012/001_lq
+precision: bf16
+seed: 123
+
+model:
+  seg_model:
+    target: model.deeplabv3.deeplabv3_mobilenet_v3_large
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+      aux_loss: false
+    target_layers: ["C5"]
+  seg_hq_model:
+    weights: weights/DeepLabV3_MobileNetV3_VOC2012_HQ.pt
+
+dataset: configs/segmentation/voc2012/realesrgan_cfg.yaml
+
+train:
+  resume:
+    res_model: ~
+    seg_model: ~
+    strict_load: false
+  optimizer:
+    res_model: ~
+    seg_model:
+      type: SGD
+      kwargs:
+        lr: 2e-2
+        momentum: 0.9
+        weight_decay: 1e-6
+  batch_size: 16
+  train_steps: 20000
+  log_every: 100
+  ckpt_every: 10000
+  image_every: 1000
+val:
+  batch_size: -1  # automatically set to the number of available GPUs
+  val_every: 2000

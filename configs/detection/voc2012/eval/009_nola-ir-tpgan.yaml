@@ -1,0 +1,52 @@
+pipeline: pipeline.detection.nola_ir_tpgan.NOLAIRTPGANPipeline
+exp_dir: experiments/detection/voc2012/009_nola-ir-tpgan
+precision: bf16
+seed: 123
+
+model:
+  sd_path: weights/stable-diffusion-2-1-base
+  diffusion:
+    start: 200
+    num_timesteps: 1
+  train_vae: false
+  lora:
+    rank: 64
+    target_modules: [to_k, to_q, to_v, to_out.0, conv, conv1, conv2, conv_shortcut, conv_out, proj_in, proj_out, ff.net.2, ff.net.0.proj]
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  det_model:
+    target: model.faster_rcnn.fasterrcnn_mobilenet_v3_large_fpn
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+    target_layers: ["0", "1"]
+  det_hq_model:
+    weights: weights/FasterRCNN_MobileNetV3_VOC2012_HQ.pt
+  disc:
+    target: model.discriminator.ImageConvNextDiscriminator
+    params:
+      precision: bf16
+
+dataset: configs/detection/voc2012/realesrgan_cfg.yaml
+
+val:
+  resume:
+    res_model: experiments/detection/voc2012/009_nola-ir-tpgan/checkpoints/res_model_last.pt
+    lora_unet: experiments/detection/voc2012/009_nola-ir-tpgan/checkpoints/lora_unet_last.pt
+    det_model: experiments/detection/voc2012/009_nola-ir-tpgan/checkpoints/det_model_last.pt
+  batch_size: -1

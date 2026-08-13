@@ -1,0 +1,74 @@
+pipeline: pipeline.optical_character_recognition.nola_ir.NOLAIRPipeline
+exp_dir: experiments/optical_character_recognition/mj/005_nola-ir
+precision: bf16
+seed: 123
+
+model:
+  sd_path: weights/stable-diffusion-2-1-base
+  diffusion:
+    start: 200
+    num_timesteps: 1
+  train_vae: false
+  lora:
+    rank: 64
+    target_modules: [to_k, to_q, to_v, to_out.0, conv, conv1, conv2, conv_shortcut, conv_out, proj_in, proj_out, ff.net.2, ff.net.0.proj]
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  ocr_model:
+    target: model.naver_ocr.BasicModel
+    params:
+      Transformation: None
+      FeatureExtraction: VGG
+      SequenceModeling: BiLSTM
+      Prediction: CTC
+      imgH: 256
+      imgW: 64
+      use_rgb: true
+      input_channel: 3
+    target_layers: ["L14"]
+  ocr_hq_model:
+    weights: experiments/optical_character_recognition/mj/000_hq/checkpoints/ocr_model_last.pt
+
+dataset: configs/optical_character_recognition/mj/realesrgan_cfg.yaml
+
+train:
+  resume:
+    res_model: experiments/optical_character_recognition/mj/002_res-only/checkpoints/res_model_last.pt
+    ocr_model: experiments/optical_character_recognition/mj/000_hq/checkpoints/ocr_model_last.pt
+    strict_load: true
+  optimizer:
+    nolair:
+      type: adamw
+      kwargs:
+        lr: 1e-4
+    ocr_model:
+      type: adam
+      kwargs:
+        lr: 5e-5
+  weight:
+    hlf: 1.0
+    ocr: 1.0
+    fm: 0.1
+  batch_size: 192
+  train_steps: 100000
+  log_every: 1000
+  ckpt_every: 10000
+  image_every: 500
+val:
+  batch_size: 192
+  val_every: 10000

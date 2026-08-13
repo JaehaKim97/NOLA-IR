@@ -1,0 +1,17 @@
+# Large files (checkpoints, datasets, experiment outputs)
+experiments
+weights
+datasets/source
+inputs
+!inputs/demo
+results
+!results/demo
+*.zip
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*.swp
+
+# Temporary / development files
+deprecated/

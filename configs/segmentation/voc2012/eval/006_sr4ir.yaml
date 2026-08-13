@@ -1,0 +1,40 @@
+pipeline: pipeline.segmentation.sr4ir.SR4IRPipeline
+exp_dir: experiments/segmentation/voc2012/006_sr4ir
+precision: bf16
+seed: 123
+
+model:
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  seg_model:
+    target: model.deeplabv3.deeplabv3_mobilenet_v3_large
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+      aux_loss: false
+    target_layers: ["C5"]
+  seg_hq_model:
+    weights: weights/DeepLabV3_MobileNetV3_VOC2012_HQ.pt
+
+dataset: configs/segmentation/voc2012/realesrgan_cfg.yaml
+
+val:
+  resume:
+    res_model: experiments/segmentation/voc2012/006_sr4ir/checkpoints/res_model_last.pt
+    seg_model: experiments/segmentation/voc2012/006_sr4ir/checkpoints/seg_model_last.pt
+  batch_size: -1

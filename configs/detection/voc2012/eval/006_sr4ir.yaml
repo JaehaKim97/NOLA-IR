@@ -1,0 +1,40 @@
+pipeline: pipeline.detection.sr4ir.SR4IRPipeline
+exp_dir: experiments/detection/voc2012/006_sr4ir
+precision: bf16
+seed: 123
+
+model:
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  det_model:
+    target: model.faster_rcnn.fasterrcnn_mobilenet_v3_large_fpn
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+    target_layers: ["0", "1"]
+  det_hq_model:
+    weights: weights/FasterRCNN_MobileNetV3_VOC2012_HQ.pt
+
+dataset: configs/detection/voc2012/realesrgan_cfg.yaml
+
+val:
+  resume:
+    res_model: experiments/detection/voc2012/006_sr4ir/checkpoints/res_model_last.pt
+    det_model: experiments/detection/voc2012/006_sr4ir/checkpoints/det_model_last.pt
+  batch_size: -1
+

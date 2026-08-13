@@ -1,0 +1,55 @@
+pipeline: pipeline.segmentation.res_only.RestorationOnlyPipeline
+exp_dir: experiments/segmentation/voc2012/002_res-only
+precision: bf16
+seed: 123
+
+model:
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  seg_model:
+    target: model.deeplabv3.deeplabv3_mobilenet_v3_large
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+      aux_loss: false
+    target_layers: ["C5"]
+  seg_hq_model:
+    weights: weights/DeepLabV3_MobileNetV3_VOC2012_HQ.pt
+
+dataset: configs/segmentation/voc2012/realesrgan_cfg.yaml
+
+train:
+  resume:
+    res_model: weights/codeformer_swinir.ckpt
+    seg_model: experiments/segmentation/voc2012/000_hq/checkpoints/seg_model_last.pt
+    strict_load: true
+  optimizer:
+    res_model:
+      type: AdamW
+      kwargs:
+        lr: 1e-4
+        weight_decay: 0
+    seg_model: ~
+  batch_size: 48
+  train_steps: 10000
+  log_every: 100
+  ckpt_every: 10000
+  image_every: 1000
+val:
+  batch_size: -1 #48
+  val_every: 2000

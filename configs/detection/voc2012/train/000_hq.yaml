@@ -1,0 +1,40 @@
+pipeline: pipeline.detection.base.BasePipeline
+exp_dir: experiments/detection/voc2012/000_hq
+precision: bf16
+seed: 123
+
+model:
+  det_model:
+    target: model.faster_rcnn.fasterrcnn_mobilenet_v3_large_fpn
+    params:
+      weights_backbone: MobileNet_V3_Large_Weights.IMAGENET1K_V1
+      num_classes: 21
+    target_layers: ["0", "1"]
+  det_hq_model:
+    weights: weights/FasterRCNN_MobileNetV3_VOC2012_HQ.pt
+
+dataset: configs/detection/voc2012/realesrgan_cfg.yaml
+
+train:
+  use_gt: true
+  resume:
+    res_model: ~
+    det_model: ~
+    strict_load: false
+  optimizer:
+    res_model: ~
+    det_model:
+      type: SGD
+      kwargs:
+        lr: 2e-2
+        momentum: 0.9
+        weight_decay: 1e-4
+  batch_size: 16
+  train_steps: 10000
+  log_every: 100
+  ckpt_every: 10000
+  image_every: 1000
+val:
+  use_gt: true
+  batch_size: -1  # automatically set to the number of available GPUs
+  val_every: 2000

@@ -1,0 +1,40 @@
+pipeline: pipeline.detection.nola_ir_demo.NOLAIRDemoPipeline
+precision: bf16
+seed: 456
+
+model:
+  sd_path: weights/stable-diffusion-2-1-base
+  diffusion:
+    start: 200
+    num_timesteps: 1
+  train_vae: false
+  lora:
+    rank: 64
+    target_modules: [to_k, to_q, to_v, to_out.0, conv, conv1, conv2, conv_shortcut, conv_out, proj_in, proj_out, ff.net.2, ff.net.0.proj]
+  res_model:
+    target: model.swinir.SwinIR
+    params:
+      img_size: 64
+      patch_size: 1
+      in_chans: 3
+      embed_dim: 180
+      depths: [6, 6, 6, 6, 6, 6, 6, 6]
+      num_heads: [6, 6, 6, 6, 6, 6, 6, 6]
+      window_size: 8
+      mlp_ratio: 2
+      sf: 8
+      img_range: 1.0
+      upsampler: "nearest+conv"
+      resi_connection: "1conv"
+      unshuffle: True
+      unshuffle_scale: 8
+  det_model:
+    target: model.faster_rcnn.fasterrcnn_resnet50_fpn_v2
+    params:
+      weights_backbone: ResNet50_Weights.IMAGENET1K_V2
+      num_classes: 91
+
+val:
+  weights: weights/nola-ir_det_realworld.pt
+  score_threshold: 0.80
+  split_acc: true

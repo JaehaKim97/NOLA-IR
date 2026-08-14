@@ -13,12 +13,13 @@ Seoul National University, Korea
 
 | Task | Low-quality input | NOLA-IR result | Reference / GT |
 |:---:|:---:|:---:|:---:|
-| OCR | <img src="inputs/demo/ocr/TEST_00.png" width="200"/> | <img src="results/demo/ocr/TEST_00_%5BPred%3Aequipment%5D.png" width="200"/> | <img src="assets/TEST_00_reference.png" width="200"/> |
-| OCR | <img src="inputs/demo/ocr/TEST_01.PNG" width="200"/> | <img src="results/demo/ocr/TEST_01_%5BPred%3Amathematical%5D.png" width="200"/> | <img src="assets/TEST_01_GT.PNG" width="200"/><br/>(GT from [SIDD](https://abdokamel.github.io/sidd/)) |
-| OCR | <img src="inputs/demo/ocr/TEST_03.png" width="200"/> | <img src="results/demo/ocr/TEST_03_%5BPred%3Aparking%5D.png" width="200"/> | – |
+| OCR | <img src="inputs/demo/ocr/TEST_00.png" width="200"/><br/>&nbsp; | <img src="results/demo/ocr/TEST_00_%5BPred%3Aequipment%5D.png" width="200"/><br/>Pred: `equipment` | <img src="assets/TEST_00_reference.png" width="200"/><br/>&nbsp; |
+| OCR | <img src="inputs/demo/ocr/TEST_01.PNG" width="200"/><br/>&nbsp; | <img src="results/demo/ocr/TEST_01_%5BPred%3Amathematical%5D.png" width="200"/><br/>Pred: `mathematical` | <img src="assets/TEST_01_GT.PNG" width="200"/><br/>(GT from [SIDD](https://abdokamel.github.io/sidd/)) |
+| OCR | <img src="inputs/demo/ocr/TEST_03.png" width="200"/><br/>&nbsp; | <img src="results/demo/ocr/TEST_03_%5BPred%3Aparking%5D.png" width="200"/><br/>Pred: `parking` | – |
 | Detection | <img src="inputs/demo/detection/TEST_00.jpg" width="200"/> | <img src="results/demo/detection/box/TEST_00.png" width="200"/> | – |
 | Detection | <img src="inputs/demo/detection/TEST_02.png" width="200"/> | <img src="results/demo/detection/box/TEST_02.png" width="200"/> | – |
 > Dashes (–) indicate that no ground-truth or reference image is available.
+> For OCR, `Pred` denotes the text recognized from the restored image.
 
 ## :gear: Installation
 

@@ -88,13 +88,13 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --main_process_port 24177 run.py 
 
 ## Detection (COCO)
 # NOTE: Requires the COCO-pretrained FasterRCNN (ResNet50-FPN) weights.
-# Reference: https://docs.pytorch.org/vision/main/models/generated/torchvision.models.detection.fasterrcnn_resnet50_fpn.html
+# Reference: https://docs.pytorch.org/vision/main/models/generated/torchvision.models.detection.fasterrcnn_resnet50_fpn_v2.html
 # Prepare them with torchvision:
 #   python -c "
-#   from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights
+#   from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 #   import torch
-#   m = fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.COCO_V1)
-#   torch.save(m.state_dict(), 'weights/FasterRCNN_ResNet50_FPN_Weights_COCO_V1.pt')"
+#   m = fasterrcnn_resnet50_fpn_v2(weights=FasterRCNN_ResNet50_FPN_V2_Weights.COCO_V1)
+#   torch.save(m.state_dict(), 'weights/FasterRCNN_ResNet50_FPN_V2_Weights_COCO_V1.pt')"
 #
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --main_process_port 24177 run.py --config configs/detection/coco/train/000_res-only.yaml
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --main_process_port 24177 run.py --config configs/detection/coco/train/001_nola-ir.yaml

@@ -7,7 +7,7 @@
 Seoul National University, Korea
 
 ## :loudspeaker: News
-- **2026.09.21**: Our paper is accepted to [ACCV 2026](https://accv2026.org/)!
+- **2026.09.21**: Our paper is accepted to [**ACCV 2026**](https://accv2026.org/)!
 - **2026.08.13**: Code and pretrained models are released.
 
 ## :sparkles: Real-world demo results
